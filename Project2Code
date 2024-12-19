@@ -1,0 +1,206 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <sstream>
+#include <set>
+#include <limits>
+
+using namespace std;
+
+// Course structure to hold course information
+struct Course {
+    string courseNumber;
+    string courseTitle;
+    vector<string> prerequisites;
+};
+
+// Function prototypes
+bool loadDataStructure(const string& filename, vector<Course>& courses);
+void printSortedCourseList(const vector<Course>& courses);
+void printCourseInfo(const vector<Course>& courses, const string& searchNumber);
+Course parseCourse(const string& line);
+
+int main() {
+    vector<Course> courses;
+    int choice = 0;
+    string searchCourse;
+    string filename;
+
+    while (true) {
+        cout << "\nABCU Course Management System\n";
+        cout << "1. Load Data Structure\n";
+        cout << "2. Print Course List\n";
+        cout << "3. Print Course Information\n";
+        cout << "9. Exit\n";
+        cout << "Enter your selection: ";
+
+        // Input validation
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please enter a number.\n";
+            continue;
+        }
+
+        switch (choice) {
+            case 1:
+                cout << "Enter filename: ";
+                cin >> filename;
+                if (loadDataStructure(filename, courses)) {
+                    cout << "Data loaded successfully.\n";
+                }
+                break;
+
+            case 2:
+                if (courses.empty()) {
+                    cout << "Please load data first (Option 1)\n";
+                } else {
+                    printSortedCourseList(courses);
+                }
+                break;
+
+            case 3:
+                if (courses.empty()) {
+                    cout << "Please load data first (Option 1)\n";
+                } else {
+                    cout << "Enter course number: ";
+                    cin >> searchCourse;
+                    printCourseInfo(courses, searchCourse);
+                }
+                break;
+
+            case 9:
+                cout << "Thank you for using the course planner!\n";
+                return 0;
+
+            default:
+                cout << "Invalid option. Please try again.\n";
+        }
+    }
+
+    return 0;
+}
+
+Course parseCourse(const string& line) {
+    Course course;
+    stringstream ss(line);
+    string item;
+    vector<string> tokens;
+
+    // Split line by commas
+    while (getline(ss, item, ',')) {
+        // Remove leading/trailing whitespace
+        item.erase(0, item.find_first_not_of(" \t"));
+        item.erase(item.find_last_not_of(" \t") + 1);
+        tokens.push_back(item);
+    }
+
+    if (tokens.size() >= 2) {
+        course.courseNumber = tokens[0];
+        course.courseTitle = tokens[1];
+
+        // Add prerequisites if they exist
+        for (size_t i = 2; i < tokens.size(); ++i) {
+            course.prerequisites.push_back(tokens[i]);
+        }
+    }
+
+    return course;
+}
+
+bool loadDataStructure(const string& filename, vector<Course>& courses) {
+    courses.clear();
+    ifstream file(filename);
+    
+    if (!file.is_open()) {
+        cout << "Error: Unable to open file " << filename << endl;
+        return false;
+    }
+
+    set<string> allCourseNumbers;
+    string line;
+    vector<string> tempLines;
+
+    // First pass: collect course numbers
+    while (getline(file, line)) {
+        tempLines.push_back(line);
+        Course tempCourse = parseCourse(line);
+        if (!tempCourse.courseNumber.empty()) {
+            allCourseNumbers.insert(tempCourse.courseNumber);
+        }
+    }
+
+    // Second pass: create course objects and validate prerequisites
+    for (const string& line : tempLines) {
+        Course course = parseCourse(line);
+        bool prereqsValid = true;
+
+        // Validate prerequisites
+        for (const string& prereq : course.prerequisites) {
+            if (allCourseNumbers.find(prereq) == allCourseNumbers.end()) {
+                cout << "Warning: Invalid prerequisite " << prereq 
+                     << " for course " << course.courseNumber << endl;
+                prereqsValid = false;
+                break;
+            }
+        }
+
+        if (prereqsValid) {
+            courses.push_back(course);
+        }
+    }
+
+    file.close();
+    return true;
+}
+
+void printSortedCourseList(const vector<Course>& courses) {
+    // Create a copy for sorting
+    vector<Course> sortedCourses = courses;
+    
+    // Sort by course number
+    sort(sortedCourses.begin(), sortedCourses.end(),
+         [](const Course& a, const Course& b) {
+             return a.courseNumber < b.courseNumber;
+         });
+
+    // Print sorted list
+    cout << "\nHere is a sample schedule:\n\n";
+    for (const Course& course : sortedCourses) {
+        cout << course.courseNumber << ": " << course.courseTitle << endl;
+    }
+}
+
+void printCourseInfo(const vector<Course>& courses, const string& searchNumber) {
+    for (const Course& course : courses) {
+        if (course.courseNumber == searchNumber) {
+            cout << "\nCourse Number: " << course.courseNumber << endl;
+            cout << "Course Title: " << course.courseTitle << endl;
+            cout << "Prerequisites: ";
+            
+            if (course.prerequisites.empty()) {
+                cout << "None" << endl;
+            } else {
+                for (size_t i = 0; i < course.prerequisites.size(); ++i) {
+                    // Find prerequisite course title
+                    string prereqTitle;
+                    for (const Course& c : courses) {
+                        if (c.courseNumber == course.prerequisites[i]) {
+                            prereqTitle = c.courseTitle;
+                            break;
+                        }
+                    }
+                    cout << course.prerequisites[i] << " - " << prereqTitle;
+                    if (i < course.prerequisites.size() - 1) {
+                        cout << ", ";
+                    }
+                }
+                cout << endl;
+            }
+            return;
+        }
+    }
+    cout << "Course not found." << endl;
+} 
