@@ -1,0 +1,73 @@
+RUNTIME COMPLEXITY ANALYSIS
+Runtime Complexities for Each Data Structure:
+Operation: Vector | Hash Table | Binary Search Tree
+--------------------------------------------------
+Load Data: O(n²) | O(n) | O(n log n)
+- File Read: O(n) | O(n) | O(n)
+- Validation: O(n²) | O(n) | O(n)
+- Insertion: O(1) | O(1) avg | O(log n)
+ 
+Search Course: O(n) | O(1) avg | O(log n)
+Print Sorted: O(n log n) | O(n log n) | O(n)
+Memory Usage: O(n) | O(n) | O(n)
+
+
+
+DETAILED ANALYSIS 
+1. VECTOR IMPLEMENTATION
+Advantages:
+- Simple implementation and maintenance
+- Continuous memory allocation (cache-friendly)
+- No overhead per element
+- Easy to iterate through all elements
+
+Disadvantages:
+- Linear O(n) search time
+- Requires sorting O(n log n) before printing ordered list
+- Poor performance for large datasets
+- O(n²) loading time due to prerequisite validation
+
+2. HASH TABLE IMPLEMENTATION
+Advantages:
+- Constant time O(1) lookups on average
+- Fast insertion and deletion
+- Excellent for individual course queries
+- Simple implementation for basic operations
+
+Disadvantages:
+- No inherent ordering (requires extra work for sorted output)
+- Extra memory overhead for hash table structure
+- Potential for hash collisions
+- Must convert to array and sort for ordered printing O(n log n)
+
+3. BINARY SEARCH TREE IMPLEMENTATION
+Advantages:
+- Natural ordering maintenance
+- Efficient O(log n) searches
+- No need to sort for ordered printing
+- Good balance of functionality and performance
+
+Disadvantages:
+- More complex implementation
+- Performance depends on tree balance
+- Pointer overhead for each node
+- Slightly slower insertions than hash table
+
+
+RECOMMENDATION
+Based on the requirements and analysis, the Binary Search Tree implementation is recommended because:
+
+1. Naturally maintains alphanumeric ordering, making Option 2 (print sorted list) efficient
+2. Provides balanced O(log n) search time for individual course lookups
+3. No additional sorting required for ordered printing
+4. Memory usage is reasonable with acceptable overhead
+5. Best matches the specific requirements of maintaining course order while supporting both individual lookups and sorted list printing
+
+
+While the hash table offers faster individual lookups, the requirement to print an ordered list makes it less optimal. The vector's simplicity is outweighed by its poor performance characteristics for larger datasets.
+
+The BST provides the best balance of:
+- Efficient searching
+- Natural ordering
+- Reasonable memory usage
+- Scalable performance
